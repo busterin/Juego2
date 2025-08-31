@@ -1,1 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Mini Mario-like</title>
+  <link rel="preload" href="style.css" as="style" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="game" aria-label="Juego tipo plataformas"></canvas>
 
+  <!-- HUD -->
+  <div id="hud">
+    <div id="timer" aria-live="polite">00:00</div>
+    <div id="progress"><div id="progress-fill"></div></div>
+  </div>
+
+  <!-- Overlays -->
+  <div id="overlay" class="show" role="dialog" aria-modal="true">
+    <div class="panel">
+      <h1>Mini Mario-like</h1>
+      <p>Mueve con ← → y salta con Espacio. En móvil, usa el pad y el botón de salto.</p>
+      <button id="btnStart">Empezar</button>
+    </div>
+  </div>
+
+  <div id="overlayEnd" role="dialog" aria-modal="true" hidden>
+    <div class="panel">
+      <h2 id="endTitle"></h2>
+      <p id="endSubtitle"></p>
+      <button id="btnRestart">Reintentar</button>
+    </div>
+  </div>
+
+  <!-- Controles táctiles (solo se muestran en móvil / táctil) -->
+  <div id="touchControls" aria-hidden="true">
+    <div class="dpad">
+      <button id="btnLeft" class="pad" aria-label="Izquierda">◄</button>
+      <button id="btnRight" class="pad" aria-label="Derecha">►</button>
+    </div>
+    <button id="btnJump" class="jump" aria-label="Saltar">⤒</button>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
