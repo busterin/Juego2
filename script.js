@@ -1,8 +1,12 @@
 (() => {
-  // -------- Canvas & escala HDPI ----------
+  // -------- Canvas & variables reusables ----------
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
+
   let vw = 0, vh = 0, dpr = 1;
+  // Declaramos floorY y groundHeight *antes* de llamar a resize()
+  let floorY = 0;
+  let groundHeight = 0;
 
   function resize() {
     dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
@@ -12,10 +16,12 @@
     canvas.style.width = vw + 'px';
     canvas.style.height = vh + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // recalculamos suelo y altura del terreno siempre aquí
     floorY = Math.floor(vh * 0.82);
+    groundHeight = Math.max(32, Math.floor(vh * 0.18));
   }
   window.addEventListener('resize', resize, { passive: true });
-  resize();
+  resize(); // llamada inicial (ahora safe porque floorY está declarado)
 
   // -------- Constantes del juego ----------
   const GRAV = 1200;
@@ -23,13 +29,10 @@
   const MAX_DX = 220;
   const JUMP_V = 420;
   const WALK_SPEED = 120;
-  const TARGET_SECONDS = 120;  // ~2 minutos
+  const TARGET_SECONDS = 120;  // ~2 minutos caminando
   const WORLD_LEN = Math.round(WALK_SPEED * TARGET_SECONDS);
 
-  let floorY = Math.floor(vh * 0.82);
-  const groundHeight = Math.max(32, Math.floor(vh * 0.18));
-
-  // -------- Jugador ----------
+  // -------- Jugador (posicionado usando floorY ya calculado) ----------
   const player = {
     x: 40,
     y: floorY - 48,
@@ -42,7 +45,7 @@
     reachedGoal: false
   };
 
-  // -------- Enemigos ----------
+  // -------- Enemigos (patrullas simples) ----------
   function makeEnemy(x, y, minX, maxX, speed) {
     return { x, y, w: 28, h: 28, vx: speed, minX, maxX, speed: Math.abs(speed) };
   }
@@ -85,7 +88,7 @@
   });
   window.addEventListener('keyup', (e) => setKey(e.code, false));
 
-  // -------- Input táctil ----------
+  // -------- Input táctil (pad y salto) ----------
   const tc = document.getElementById('touchControls');
   const btnLeft = document.getElementById('btnLeft');
   const btnRight = document.getElementById('btnRight');
@@ -123,14 +126,19 @@
 
   btnStart.addEventListener('click', startGame);
   btnRestart.addEventListener('click', () => {
+    // Aseguramos que el estado permita volver a arrancar
     overlayEnd.hidden = true;
     overlay.classList.remove('show');
     resetGame();
+    started = false;
     startGame();
   });
 
   function startGame() {
+    // oculta overlays por si siguen visibles
+    overlayEnd.hidden = true;
     overlay.classList.remove('show');
+
     if (!started) {
       started = true;
       startTime = performance.now();
@@ -146,11 +154,12 @@
     player.onGround = true;
     player.alive = true;
     player.reachedGoal = false;
-    enemies.forEach((e, i) => {
+    enemies.forEach((e) => {
       e.x = e.minX + 50;
       e.vx = Math.sign(e.vx || 1) * e.speed;
     });
     camX = 0; elapsed = 0;
+    started = false;
   }
 
   // -------- Lógica del juego ----------
@@ -164,21 +173,25 @@
 
     if (!player.alive || player.reachedGoal) return endRound();
 
+    // movimiento horizontal
     if (keys.left && !keys.right) player.vx = -WALK_SPEED;
     else if (keys.right && !keys.left) player.vx = WALK_SPEED;
     else player.vx *= FRICTION;
 
+    // salto consumible
     if (keys.jump && player.onGround) {
       player.vy = -JUMP_V;
       player.onGround = false;
     }
     keys.jump = false;
 
+    // física
     player.vx = Math.max(-MAX_DX, Math.min(MAX_DX, player.vx));
     player.vy += GRAV * dt;
     player.x += player.vx * dt;
     player.y += player.vy * dt;
 
+    // colisión suelo
     const groundTop = floorY;
     if (player.y + player.h >= groundTop) {
       player.y = groundTop - player.h;
@@ -186,9 +199,11 @@
       player.onGround = true;
     }
 
+    // límites
     if (player.x < 0) player.x = 0;
     if (player.x + player.w > WORLD_LEN) player.x = WORLD_LEN - player.w;
 
+    // enemigos
     enemies.forEach(e => {
       e.x += e.vx * dt;
       if (e.x < e.minX) { e.x = e.minX; e.vx = e.speed; }
@@ -196,10 +211,10 @@
       if (aabb(player, e)) player.alive = false;
     });
 
-    if (aabb(player, goal)) {
-      player.reachedGoal = true;
-    }
+    // meta
+    if (aabb(player, goal)) player.reachedGoal = true;
 
+    // HUD
     elapsed = (t - startTime) / 1000;
     timerEl.textContent = formatTime(elapsed);
     progressFill.style.width = `${Math.min(100, ((player.x + player.w) / WORLD_LEN) * 100)}%`;
@@ -210,6 +225,7 @@
 
   function endRound() {
     if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+    started = false; // permitimos reiniciar
     overlay.classList.remove('show');
     overlayEnd.hidden = false;
     const timeStr = formatTime(elapsed);
