@@ -6,7 +6,7 @@
 
 * { box-sizing: border-box; }
 html, body {
-  margin: 0; height: 100%; background: #87ceeb; /* cielo */
+  margin: 0; height: 100%; background: #87ceeb;
   font-family: system-ui, Arial, sans-serif;
   overscroll-behavior: none;
 }
@@ -14,7 +14,7 @@ html, body {
   display: block;
   width: 100vw; height: 100vh;
   image-rendering: pixelated;
-  touch-action: none; /* evita scroll durante gestos */
+  touch-action: none;
 }
 
 /* HUD */
