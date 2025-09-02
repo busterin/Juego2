@@ -101,6 +101,14 @@ body {
 .coin1 { background:url("img/Moneda1.png") center/contain no-repeat; }
 .coin2 { background:url("img/Moneda2.png") center/contain no-repeat; }
 
+/* Icono de puntos personalizado */
+.score-icon {
+  width: 22px;
+  height: 22px;
+  background: url("img/Puntos.png") center/contain no-repeat;
+  display: inline-block;
+}
+
 /* Overlays */
 .overlay {
   position: fixed; inset: 0; display:none;
