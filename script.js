@@ -1,6 +1,6 @@
 // ====== Referencias ======
 const gameWrapper = document.getElementById("gameWrapper");
-const gameArea    = document.getElementById("gameArea");
+const gameArea    = document.getElementById("gameArea"); // <div id="gameArea" tabindex="0">
 const hud         = document.getElementById("hud");
 const player      = document.getElementById("player");
 const btnUp       = document.getElementById("btnUp");
@@ -98,6 +98,9 @@ function startGame(){
 
   fitStage(); musicStart();
   scheduleNextObstacle(); scheduleNextCoin();
+
+  // 👇 Enfoca el juego al arrancar (clave para Genially/iframe)
+  focusGame();
 }
 
 // ====== Inputs (solo subir/bajar) ======
@@ -111,10 +114,16 @@ function tryLane(delta){
   player.style.bottom = LANE_BOTTOMS[laneIndex] + "px";
   try { sndStep.currentTime=0; sndStep.play(); } catch(_){}
 }
-document.addEventListener("keydown", e=>{
-  if (e.code === "ArrowUp")   tryLane(+1);
-  if (e.code === "ArrowDown") tryLane(-1);
-});
+// Captura global: si el contenedor (Genially) intenta usar las flechas, traemos el foco al juego
+window.addEventListener("keydown", (e)=>{
+  if (e.code === "ArrowUp" || e.code === "ArrowDown") {
+    e.preventDefault(); // evita scroll en el contenedor
+    focusGame();
+    if (e.code === "ArrowUp")   tryLane(+1);
+    if (e.code === "ArrowDown") tryLane(-1);
+  }
+}, { capture: true });
+
 function bindTap(btn, cb){
   if(!btn) return;
   btn.onmousedown  = ev=>{ ev.preventDefault(); cb(); };
@@ -145,7 +154,7 @@ function moveLoop(t){
 }
 requestAnimationFrame(moveLoop);
 
-// ====== Spawners (sin salto) ======
+// ====== Spawners (dos tipos por entidad, sin salto) ======
 function rand(a,b){return Math.random()*(b-a)+a;}
 function randi(a,b){return Math.floor(rand(a,b));}
 
@@ -157,7 +166,7 @@ function spawnObstacle(){
   ob.dataset.lane = String(lane);
   ob.style.bottom = LANE_BOTTOMS[lane] + "px";
 
-  // 👇 Elige tipo de obstáculo
+  // tipo visual aleatorio: obstacle1 / obstacle2
   const type = Math.random() < 0.5 ? "obstacle1" : "obstacle2";
   ob.classList.add(type);
 
@@ -166,10 +175,9 @@ function spawnObstacle(){
   gameArea.appendChild(ob);
   ob.addEventListener("animationend", ()=> ob.remove(), { once:true });
 }
-
 function scheduleNextObstacle(){
   clearTimeout(obstacleTimer);
-  // menos frecuencia → aparecen cada 1800–2800ms (según la dificultad)
+  // menos frecuencia (petición del usuario)
   const delay = randi(1800, 2800) / speedScale;
   obstacleTimer = setTimeout(()=>{ spawnObstacle(); scheduleNextObstacle(); }, delay);
 }
@@ -182,7 +190,7 @@ function spawnCoin(){
   c.dataset.lane = String(lane);
   c.style.bottom = LANE_BOTTOMS[lane] + "px";
 
-  // 👇 Elige tipo de moneda
+  // tipo visual aleatorio: coin1 / coin2
   const type = Math.random() < 0.5 ? "coin1" : "coin2";
   c.classList.add(type);
 
@@ -191,10 +199,9 @@ function spawnCoin(){
   gameArea.appendChild(c);
   c.addEventListener("animationend", ()=> c.remove(), { once:true });
 }
-
 function scheduleNextCoin(){
   clearTimeout(coinTimer);
-  // menos frecuencia → monedas cada 1200–2000ms
+  // menos frecuencia
   const delay = randi(1200, 2000) / Math.min(speedScale, 1.5);
   coinTimer = setTimeout(()=>{ spawnCoin(); scheduleNextCoin(); }, delay);
 }
@@ -206,10 +213,10 @@ function checkCollisions(){
   if(!running) return;
   const rp = player.getBoundingClientRect();
 
-  // Monedas (solo las del mismo lane)
+  // Monedas del mismo lane
   document.querySelectorAll(".coin").forEach(c=>{
     if (!c.isConnected) return;
-    if (Number(c.dataset.lane) !== laneIndex) return;       // ← filtra por piso
+    if (Number(c.dataset.lane) !== laneIndex) return;
     const rc = c.getBoundingClientRect();
     if (rectsOverlap(rp, rc)) {
       try { sndCoin.currentTime=0; sndCoin.play(); } catch(_){}
@@ -220,10 +227,10 @@ function checkCollisions(){
     }
   });
 
-  // Obstáculos (solo los del mismo lane)
+  // Obstáculos del mismo lane
   document.querySelectorAll(".obstacle").forEach(ob=>{
     if (!ob.isConnected) return;
-    if (Number(ob.dataset.lane) !== laneIndex) return;      // ← filtra por piso
+    if (Number(ob.dataset.lane) !== laneIndex) return;
     const ro = ob.getBoundingClientRect();
     if (rectsOverlap(rp, ro)) onHit(ob);
   });
@@ -250,8 +257,8 @@ function onHit(ob){
 }
 
 // ====== Win / Fin / Reinicio ======
-function showWin(){ winOverlay.classList.add("visible"); }
-function hideWin(){ winOverlay.classList.remove("visible"); }
+function showWin(){ winOverlay?.classList.add("visible"); }
+function hideWin(){ winOverlay?.classList.remove("visible"); }
 function onWin(){
   if (!running) return;
   running = false;
@@ -268,6 +275,31 @@ function onGameOver(){
   // reinicio suave
   setTimeout(()=> startGame(), 1200);
 }
+
+// ====== Auto-enfoque (clave para Genially/iframe) ======
+function focusGame() {
+  if (!gameArea) return;
+  // Evita robar foco si hay un input en uso
+  const ae = document.activeElement;
+  const typing = ae && (ae.tagName === "INPUT" || ae.tagName === "TEXTAREA" || ae.isContentEditable);
+  if (typing) return;
+  try { gameArea.focus({ preventScroll: true }); } catch(_) {}
+}
+
+// Intenta enfocar al cargar (con pequeño delay para iframes)
+window.addEventListener("DOMContentLoaded", () => setTimeout(focusGame, 80));
+window.addEventListener("load", () => setTimeout(focusGame, 120));
+
+// Reengancha el foco ante cualquier gesto del usuario dentro del iframe
+["pointerdown","pointerup","touchstart","touchend","click","mouseenter"].forEach(ev=>{
+  window.addEventListener(ev, focusGame, { capture: true, passive: true });
+});
+
+// Si el iframe recupera visibilidad/ventana, vuelve a enfocar
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") setTimeout(focusGame, 60);
+});
+window.addEventListener("blur", () => setTimeout(focusGame, 0));
 
 // ====== Layout ======
 window.addEventListener("resize", fitStage);
