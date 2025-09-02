@@ -86,6 +86,24 @@ body {
 .coin.pop { animation: coinPop .24s ease forwards; }
 @keyframes coinPop { 0%{transform:scale(1); opacity:1;} 100%{transform:scale(1.6); opacity:0;} }
 
+/* Overlays */
+.overlay {
+  position: fixed; inset: 0; display:none;
+  align-items:center; justify-content:center;
+  background: rgba(0,0,0,.6); z-index: 3000;
+}
+.overlay.visible { display:flex; }
+.overlay-box {
+  background:#fff; border:2px solid #333; border-radius:14px;
+  padding:24px 28px; max-width: 500px; width:90%; text-align: center;
+}
+.btn {
+  display:inline-block; padding:12px 20px; border-radius:10px; border:2px solid #333;
+  background:#fff; cursor:pointer; font-weight:700;
+  box-shadow:0 4px 0 #333; transition:transform .06s ease, box-shadow .2s ease;
+}
+.btn.primary { background:#2ecc71; border-color:#27ae60; color:#fff; box-shadow:0 4px 0 #239d57; }
+
 /* Controles móviles */
 .controls{
   position: fixed; left:50%; transform: translateX(-50%);
