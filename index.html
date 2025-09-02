@@ -9,7 +9,8 @@
 <body>
   <!-- Contenedor del juego -->
   <div class="game" id="gameWrapper">
-    <div class="stage" id="gameArea">
+    <!-- tabindex="0" para poder enfocar el área y recibir teclado dentro de iframes -->
+    <div class="stage" id="gameArea" tabindex="0" aria-label="Área de juego">
       <!-- HUD de vidas -->
       <div id="hud" class="hud" aria-label="Vidas restantes"></div>
 
@@ -18,24 +19,26 @@
         🪙 <span id="coinTxt">0</span>
       </div>
 
+      <!-- Tinte de cielo (ciclo día/noche) -->
       <div id="sky" class="sky-tint" aria-hidden="true"></div>
 
-      <div id="player"></div>
+      <!-- Jugador -->
+      <div id="player" role="img" aria-label="Oso"></div>
     </div>
   </div>
 
-  <!-- Aviso de victoria -->
-  <div id="winOverlay" class="overlay">
-    <div class="overlay-box">
+  <!-- Overlay de victoria -->
+  <div id="winOverlay" class="overlay" aria-hidden="true">
+    <div class="overlay-box" role="dialog" aria-live="polite" aria-label="Victoria">
       <h2>¡LO HAS CONSEGUIDO! 2573</h2>
-      <button id="restartBtn" class="btn primary">Reiniciar</button>
+      <button id="restartBtn" class="btn primary" aria-label="Reiniciar partida">Reiniciar</button>
     </div>
   </div>
 
   <!-- Controles móviles (solo subir/bajar) -->
-  <div class="controls">
-    <button id="btnUp"   class="ctrl">⬆︎</button>
-    <button id="btnDown" class="ctrl">⬇︎</button>
+  <div class="controls" aria-label="Controles móviles">
+    <button id="btnUp"   class="ctrl" aria-label="Subir de línea">⬆︎</button>
+    <button id="btnDown" class="ctrl" aria-label="Bajar de línea">⬇︎</button>
   </div>
 
   <script src="script.js"></script>
