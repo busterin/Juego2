@@ -135,8 +135,7 @@ function moveLoop(t){
     speedScale = Math.min(MAX_SPEED_SCALE, speedScale + dt * 0.02);
     worldX += AUTO_SPEED * speedScale * dt;
 
-    // 👉 desplaza el fondo para dar sensación de movimiento
-    // factor 0.25 = parallax leve; ajusta a tu gusto
+    // Fondo: parallax leve
     gameArea.style.backgroundPositionX = `${-(worldX*0.25)}px`;
 
     // Colisiones / recogidas
@@ -155,7 +154,8 @@ function spawnObstacle(){
   const ob = document.createElement("div");
   ob.className = "obstacle";
   const lane = randi(0, LANE_BOTTOMS.length);
-  ob.style.bottom = LANE_BOTTOMS[lane] + "px";
+  ob.dataset.lane = String(lane);                           // ← guarda el piso
+  ob.style.bottom = LANE_BOTTOMS[lane] + "px";              // ← alinea al suelo del piso
   const dur = (rand(2.8, 3.6) / speedScale).toFixed(2);
   ob.style.setProperty("--obDur", dur + "s");
   gameArea.appendChild(ob);
@@ -172,7 +172,9 @@ function spawnCoin(){
   const c = document.createElement("div");
   c.className = "coin";
   const lane = randi(0, LANE_BOTTOMS.length);
-  c.style.bottom = (LANE_BOTTOMS[lane] + 42) + "px";
+  c.dataset.lane = String(lane);                             // ← guarda el piso
+  // La moneda usa mismo tamaño y “suelo” que la roca para coherencia de colisión
+  c.style.bottom = LANE_BOTTOMS[lane] + "px";
   const dur = (rand(2.6, 3.6) / Math.min(speedScale,1.7)).toFixed(2);
   c.style.setProperty("--coinDur", dur + "s");
   gameArea.appendChild(c);
@@ -184,31 +186,31 @@ function scheduleNextCoin(){
   coinTimer = setTimeout(()=>{ spawnCoin(); scheduleNextCoin(); }, delay);
 }
 
-// ====== Colisiones ======
+// ====== Colisiones (SOLO mismo piso) ======
 function rectsOverlap(a,b){ return !(a.right<b.left || a.left>b.right || a.bottom<b.top || a.top>b.bottom); }
 
 function checkCollisions(){
   if(!running) return;
   const rp = player.getBoundingClientRect();
 
-  // Monedas
+  // Monedas (solo las del mismo lane)
   document.querySelectorAll(".coin").forEach(c=>{
     if (!c.isConnected) return;
+    if (Number(c.dataset.lane) !== laneIndex) return;       // ← filtra por piso
     const rc = c.getBoundingClientRect();
     if (rectsOverlap(rp, rc)) {
       try { sndCoin.currentTime=0; sndCoin.play(); } catch(_){}
       coins += 1; renderCoins();
       c.classList.add("pop");
       setTimeout(()=> c.remove(), 240);
-
-      // 👉 victoria al llegar a 10 monedas
       if (coins >= 10) { onWin(); }
     }
   });
 
-  // Enemigos
+  // Obstáculos (solo los del mismo lane)
   document.querySelectorAll(".obstacle").forEach(ob=>{
     if (!ob.isConnected) return;
+    if (Number(ob.dataset.lane) !== laneIndex) return;      // ← filtra por piso
     const ro = ob.getBoundingClientRect();
     if (rectsOverlap(rp, ro)) onHit(ob);
   });
@@ -235,12 +237,8 @@ function onHit(ob){
 }
 
 // ====== Win / Fin / Reinicio ======
-function showWin(){
-  winOverlay.classList.add("visible");
-}
-function hideWin(){
-  winOverlay.classList.remove("visible");
-}
+function showWin(){ winOverlay.classList.add("visible"); }
+function hideWin(){ winOverlay.classList.remove("visible"); }
 function onWin(){
   if (!running) return;
   running = false;
