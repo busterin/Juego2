@@ -154,13 +154,19 @@ function spawnObstacle(){
   const ob = document.createElement("div");
   ob.className = "obstacle";
   const lane = randi(0, LANE_BOTTOMS.length);
-  ob.dataset.lane = String(lane);                           // ← guarda el piso
-  ob.style.bottom = LANE_BOTTOMS[lane] + "px";              // ← alinea al suelo del piso
+  ob.dataset.lane = String(lane);
+  ob.style.bottom = LANE_BOTTOMS[lane] + "px";
+
+  // 👇 Elige tipo de obstáculo
+  const type = Math.random() < 0.5 ? "obstacle1" : "obstacle2";
+  ob.classList.add(type);
+
   const dur = (rand(2.8, 3.6) / speedScale).toFixed(2);
   ob.style.setProperty("--obDur", dur + "s");
   gameArea.appendChild(ob);
   ob.addEventListener("animationend", ()=> ob.remove(), { once:true });
 }
+
 function scheduleNextObstacle(){
   clearTimeout(obstacleTimer);
   const delay = Math.max(260, randi(700, 1300) / speedScale);
@@ -172,14 +178,19 @@ function spawnCoin(){
   const c = document.createElement("div");
   c.className = "coin";
   const lane = randi(0, LANE_BOTTOMS.length);
-  c.dataset.lane = String(lane);                             // ← guarda el piso
-  // La moneda usa mismo tamaño y “suelo” que la roca para coherencia de colisión
+  c.dataset.lane = String(lane);
   c.style.bottom = LANE_BOTTOMS[lane] + "px";
+
+  // 👇 Elige tipo de moneda
+  const type = Math.random() < 0.5 ? "coin1" : "coin2";
+  c.classList.add(type);
+
   const dur = (rand(2.6, 3.6) / Math.min(speedScale,1.7)).toFixed(2);
   c.style.setProperty("--coinDur", dur + "s");
   gameArea.appendChild(c);
   c.addEventListener("animationend", ()=> c.remove(), { once:true });
 }
+
 function scheduleNextCoin(){
   clearTimeout(coinTimer);
   const delay = randi(500, 1100) / Math.min(speedScale, 1.7);
