@@ -7,6 +7,9 @@ const btnUp       = document.getElementById("btnUp");
 const btnDown     = document.getElementById("btnDown");
 const coinTxt     = document.getElementById("coinTxt");
 
+const winOverlay  = document.getElementById("winOverlay");
+const restartBtn  = document.getElementById("restartBtn");
+
 // ====== Sonidos ======
 const sndHit  = new Audio("sounds/hit.mp3");
 const sndStep = new Audio("sounds/jump.mp3");   // bip al cambiar de piso
@@ -59,7 +62,7 @@ let laneIndex = 0;
 const LANE_COOLDOWN_MS = 140;
 let laneSwitchUntil = 0;
 
-// Auto-avance
+// Auto-avance + fondo desplazándose
 const AUTO_SPEED = 240;              // px/s base
 let speedScale = 1;                  // dificultad
 const MAX_SPEED_SCALE = 2.0;
@@ -81,6 +84,7 @@ function renderCoins(){ if (coinTxt) coinTxt.textContent = String(coins); }
 
 // ====== Inicio / reinicio ======
 function startGame(){
+  hideWin();
   running=true; worldX=0; speedScale=1; laneIndex=0;
   lives=MAX_LIVES; invulnerableUntil=0; renderLives();
   coins=0; renderCoins();
@@ -99,7 +103,7 @@ function startGame(){
 // ====== Inputs (solo subir/bajar) ======
 function tryLane(delta){
   const now = performance.now();
-  if (now < laneSwitchUntil) return;
+  if (now < laneSwitchUntil || !running) return;
   const ni = Math.max(0, Math.min(LANE_BOTTOMS.length-1, laneIndex + (delta>0?+1:-1)));
   if (ni === laneIndex) return;
   laneIndex = ni;
@@ -127,8 +131,15 @@ function moveLoop(t){
   lastTime=t;
 
   if(running){
+    // dificultad suave
     speedScale = Math.min(MAX_SPEED_SCALE, speedScale + dt * 0.02);
     worldX += AUTO_SPEED * speedScale * dt;
+
+    // 👉 desplaza el fondo para dar sensación de movimiento
+    // factor 0.25 = parallax leve; ajusta a tu gusto
+    gameArea.style.backgroundPositionX = `${-(worldX*0.25)}px`;
+
+    // Colisiones / recogidas
     checkCollisions();
   }
   requestAnimationFrame(moveLoop);
@@ -189,6 +200,9 @@ function checkCollisions(){
       coins += 1; renderCoins();
       c.classList.add("pop");
       setTimeout(()=> c.remove(), 240);
+
+      // 👉 victoria al llegar a 10 monedas
+      if (coins >= 10) { onWin(); }
     }
   });
 
@@ -210,7 +224,7 @@ function destroyObstacle(ob){
 
 function onHit(ob){
   const now=performance.now();
-  if(now < invulnerableUntil) return;
+  if(now < invulnerableUntil || !running) return;
   lives = Math.max(0, lives - 1);
   renderLives();
   player.classList.add("hurt");
@@ -220,12 +234,28 @@ function onHit(ob){
   if(lives <= 0) onGameOver();
 }
 
-// ====== Fin / Reinicio ======
+// ====== Win / Fin / Reinicio ======
+function showWin(){
+  winOverlay.classList.add("visible");
+}
+function hideWin(){
+  winOverlay.classList.remove("visible");
+}
+function onWin(){
+  if (!running) return;
+  running = false;
+  musicStop();
+  clearTimeout(obstacleTimer); clearTimeout(coinTimer);
+  showWin();
+}
+restartBtn?.addEventListener("click", ()=> startGame());
+
 function onGameOver(){
   running=false;
   clearTimeout(obstacleTimer); clearTimeout(coinTimer);
   musicStop();
-  setTimeout(()=> startGame(), 1200); // reinicio suave
+  // reinicio suave
+  setTimeout(()=> startGame(), 1200);
 }
 
 // ====== Layout ======
