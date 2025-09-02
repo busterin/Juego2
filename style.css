@@ -114,6 +114,14 @@ body {
   box-shadow: 0 8px 20px rgba(0,0,0,0.15); z-index: 1500; backdrop-filter: blur(4px);
   max-width: calc(100vw - 20px);
 }
+/* ==== Variantes de monedas ==== */
+.coin1 { background:url("img/Moneda1.png") center/contain no-repeat; }
+.coin2 { background:url("img/Moneda2.png") center/contain no-repeat; }
+
+/* ==== Variantes de obstáculos ==== */
+.obstacle1 { background:url("img/Roca1.png") center/contain no-repeat; }
+.obstacle2 { background:url("img/Roca2.png") center/contain no-repeat; }
+
 .ctrl{
   width:min(22vw,120px); max-width:140px; height:56px; border:2px solid #333; border-radius:10px;
   background:#fff; font-size:22px; font-weight:700; touch-action: manipulation;
