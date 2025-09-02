@@ -6,7 +6,7 @@
 body {
   font-family: Arial, sans-serif;
   margin: 0;
-  background: #662D91;  /* 👈 nuevo color exacto */
+  background: #662D91;  /* color de fondo exterior */
 }
 
 /* Contenedor del juego */
@@ -23,6 +23,11 @@ body {
   overflow: hidden;
   transform: scale(var(--scale));
   transform-origin: top center;
+}
+
+/* 👇 Quita marco azul al enfocar el área */
+#gameArea:focus {
+  outline: none;
 }
 
 /* Cielo día-noche (sutil) */
@@ -57,8 +62,8 @@ body {
 /* Oso (jugador) */
 #player {
   position: absolute; bottom: 0; left: 140px;
-  width: 56px;   /* antes 80px */
-  height: 56px;  /* antes 80px */
+  width: 56px;   /* adaptado al piso */
+  height: 56px;
   background:url("img/Oso.png") center bottom/contain no-repeat;
   transform-origin: bottom center; z-index: 2;
   transition: bottom 120ms ease, opacity .12s linear;
@@ -66,10 +71,10 @@ body {
 #player.hurt { animation: hurtBlink .6s ease-in-out; }
 @keyframes hurtBlink { 0%,100%{opacity:1;} 20%,40%,60%,80%{opacity:.2;} }
 
-/* Obstáculos (sin salto) – mismo tamaño que moneda */
+/* Obstáculos */
 .obstacle {
   position:absolute; bottom:0; width:var(--entitySize); height:var(--entitySize); z-index:1;
-  background:url("img/Roca.png") bottom center/contain no-repeat;
+  background:url("img/Roca1.png") bottom center/contain no-repeat;
   animation: moveObstacle var(--obDur,3.2s) linear 1;
   right: -60px;
 }
@@ -77,16 +82,24 @@ body {
 .obstacle.disintegrate{ animation:rockVanish .24s ease forwards; }
 @keyframes rockVanish{ 0%{opacity:1;}70%{opacity:.35;}100%{opacity:0;transform:translateY(-6px);} }
 
-/* Monedas – mismo tamaño que obstáculo */
+/* Variantes de obstáculos */
+.obstacle1 { background:url("img/Roca1.png") bottom center/contain no-repeat; }
+.obstacle2 { background:url("img/Roca2.png") bottom center/contain no-repeat; }
+
+/* Monedas */
 .coin {
   position:absolute; width:var(--entitySize); height:var(--entitySize); z-index:1;
-  background:url("img/Moneda.png") center/contain no-repeat;
+  background:url("img/Moneda1.png") center/contain no-repeat;
   animation: moveCoin var(--coinDur,3.2s) linear 1;
   right: -30px;
 }
 @keyframes moveCoin { from{ right:-30px; } to{ right:100%; } }
 .coin.pop { animation: coinPop .24s ease forwards; }
 @keyframes coinPop { 0%{transform:scale(1); opacity:1;} 100%{transform:scale(1.6); opacity:0;} }
+
+/* Variantes de monedas */
+.coin1 { background:url("img/Moneda1.png") center/contain no-repeat; }
+.coin2 { background:url("img/Moneda2.png") center/contain no-repeat; }
 
 /* Overlays */
 .overlay {
@@ -115,14 +128,6 @@ body {
   box-shadow: 0 8px 20px rgba(0,0,0,0.15); z-index: 1500; backdrop-filter: blur(4px);
   max-width: calc(100vw - 20px);
 }
-/* ==== Variantes de monedas ==== */
-.coin1 { background:url("img/Moneda1.png") center/contain no-repeat; }
-.coin2 { background:url("img/Moneda2.png") center/contain no-repeat; }
-
-/* ==== Variantes de obstáculos ==== */
-.obstacle1 { background:url("img/Roca1.png") center/contain no-repeat; }
-.obstacle2 { background:url("img/Roca2.png") center/contain no-repeat; }
-
 .ctrl{
   width:min(22vw,120px); max-width:140px; height:56px; border:2px solid #333; border-radius:10px;
   background:#fff; font-size:22px; font-weight:700; touch-action: manipulation;
