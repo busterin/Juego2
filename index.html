@@ -1,12 +1,35 @@
-<div id="hud">
-  <div id="timer">00:00</div>
-  <div id="progress"><div id="progress-fill"></div></div>
-</div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OSO RUNNER</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <!-- Contenedor del juego -->
+  <div class="game" id="gameWrapper">
+    <div class="stage" id="gameArea">
+      <!-- HUD de vidas -->
+      <div id="hud" class="hud" aria-label="Vidas restantes"></div>
 
-<button id="btnPlay">Jugar</button>
+      <!-- HUD de monedas -->
+      <div id="scoreHud" class="hud hud-right" aria-label="Monedas">
+        🪙 <span id="coinTxt">0</span>
+      </div>
 
-<div id="overlayEnd" hidden>
-  <h1 id="endTitle"></h1>
-  <p id="endSubtitle"></p>
-  <button id="btnRestart">Reintentar</button>
-</div>
+      <div id="sky" class="sky-tint" aria-hidden="true"></div>
+
+      <div id="player"></div>
+    </div>
+  </div>
+
+  <!-- Controles móviles (solo subir/bajar) -->
+  <div class="controls">
+    <button id="btnUp"   class="ctrl">⬆︎</button>
+    <button id="btnDown" class="ctrl">⬇︎</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
