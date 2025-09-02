@@ -169,7 +169,8 @@ function spawnObstacle(){
 
 function scheduleNextObstacle(){
   clearTimeout(obstacleTimer);
-  const delay = Math.max(260, randi(700, 1300) / speedScale);
+  // menos frecuencia → aparecen cada 1800–2800ms (según la dificultad)
+  const delay = randi(1800, 2800) / speedScale;
   obstacleTimer = setTimeout(()=>{ spawnObstacle(); scheduleNextObstacle(); }, delay);
 }
 
@@ -193,7 +194,8 @@ function spawnCoin(){
 
 function scheduleNextCoin(){
   clearTimeout(coinTimer);
-  const delay = randi(500, 1100) / Math.min(speedScale, 1.7);
+  // menos frecuencia → monedas cada 1200–2000ms
+  const delay = randi(1200, 2000) / Math.min(speedScale, 1.5);
   coinTimer = setTimeout(()=>{ spawnCoin(); scheduleNextCoin(); }, delay);
 }
 
