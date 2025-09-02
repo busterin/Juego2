@@ -1,87 +1,102 @@
-:root{
-  --ui-bg: rgba(0,0,0,0.45);
-  --ui-fg: #fff;
-  --accent: #4cd6ff;
-}
-
+/* ==== Base y variables ==== */
 * { box-sizing: border-box; }
-html, body {
-  margin: 0; height: 100%; background: #87ceeb;
-  font-family: system-ui, Arial, sans-serif;
-  overscroll-behavior: none;
-}
-#game {
-  display: block;
-  width: 100vw; height: 100vh;
-  image-rendering: pixelated;
-  touch-action: none;
+:root { --dayCycle: 60s; --scale: 1; }
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #eaeaea;
 }
 
-/* HUD */
-#hud {
-  position: fixed; top: 12px; left: 12px; right: 12px;
-  display: flex; gap: 12px; align-items: center; pointer-events: none;
-}
-#timer {
-  min-width: 80px; padding: 6px 10px;
-  background: var(--ui-bg); color: var(--ui-fg); border-radius: 8px;
-  text-align: center; font-weight: 700; letter-spacing: 1px;
-}
-#progress {
-  flex: 1; height: 10px; background: rgba(255,255,255,0.35);
-  border-radius: 6px; overflow: hidden;
-}
-#progress-fill {
-  width: 0%; height: 100%; background: var(--accent);
+/* Contenedor del juego */
+.game { width: 100vw; max-width: 1100px; margin: 10px auto; }
+
+/* Área de juego (600×200) */
+.stage {
+  position: relative;
+  width: 600px;
+  height: 200px;
+  margin: 0 auto;
+  background:#fff url("img/FondoTile.PNG") repeat-x bottom/auto 100%;
+  border: 2px solid #333;
+  overflow: hidden;
+  transform: scale(var(--scale));
+  transform-origin: top center;
 }
 
-/* Overlays */
-#overlay, #overlayEnd {
-  position: fixed; inset: 0; display: grid; place-items: center;
-  background: rgba(0,0,0,0.4); backdrop-filter: blur(2px);
+/* Cielo día-noche (sutil) */
+.sky-tint {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  mix-blend-mode: multiply; opacity: 0.9;
+  animation: skyCycle var(--dayCycle) linear infinite;
 }
-#overlay:not(.show) { display: none; }
-.panel {
-  width: min(90vw, 520px); padding: 24px;
-  background: #111; color: #eee; border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-  text-align: center;
-}
-.panel button {
-  margin-top: 10px; padding: 10px 18px; border-radius: 10px;
-  border: none; font-size: 16px; font-weight: 700;
-  background: var(--accent); color: #001018; cursor: pointer;
+@keyframes skyCycle {
+  0%{background:transparent;} 25%{background:rgba(255,200,120,0.18);}
+  50%{background:rgba(30,60,120,0.38);} 75%{background:rgba(255,120,160,0.22);}
+  100%{background:transparent;}
 }
 
-/* Controles táctiles */
-#touchControls {
-  position: fixed; inset: 0; pointer-events: none; display: none;
+/* HUD genérico */
+.hud {
+  position: absolute; top: 6px; left: 6px; z-index: 5;
+  display: flex; gap: 6px; align-items: center;
+  padding: 4px 6px;
+  background: rgba(255,255,255,0.6);
+  border: 1px solid #333; border-radius: 8px;
+  font-weight: 700;
 }
-#touchControls.visible { display: block; }
-.dpad {
-  position: absolute; left: 12px; bottom: 12px;
-  display: grid; grid-template-columns: repeat(2, 64px); gap: 10px;
-  pointer-events: none;
-}
-.pad {
-  width: 64px; height: 64px; border-radius: 50%;
-  background: var(--ui-bg); color: var(--ui-fg); font-size: 20px;
-  border: 2px solid rgba(255,255,255,0.5);
-  pointer-events: auto;
-}
-#btnLeft { grid-column: 1; }
-#btnRight { grid-column: 2; }
+.hud-right { right: 6px; left: auto; }
 
-.jump {
-  position: absolute; right: 12px; bottom: 24px;
-  width: 84px; height: 84px; border-radius: 50%;
-  background: var(--ui-bg); color: var(--ui-fg); font-size: 28px;
-  border: 2px solid rgba(255,255,255,0.5);
-  pointer-events: auto;
+.honey {
+  width: 22px; height: 22px;
+  background: url("img/Panal.png") center/contain no-repeat;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.3));
 }
 
-/* Botones activos */
-.pad:active, .jump:active { transform: scale(0.98); filter: brightness(1.2); }
+/* Oso (jugador) */
+#player {
+  position: absolute; bottom: 0; left: 140px; /* X fija */
+  width: 80px; height: 80px;
+  background:url("img/Oso.png") center bottom/contain no-repeat;
+  transform-origin: bottom center; z-index: 2;
+  transition: bottom 120ms ease, opacity .12s linear;
+}
+#player.hurt { animation: hurtBlink .6s ease-in-out; }
+@keyframes hurtBlink { 0%,100%{opacity:1;} 20%,40%,60%,80%{opacity:.2;} }
 
-/* Accesibilidad foco */
-button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+/* Enemigos (rocas sin salto) */
+.obstacle {
+  position:absolute; bottom:0; width:50px; height:50px; z-index:1;
+  background:url("img/Roca.png") bottom center/contain no-repeat;
+  animation: moveObstacle var(--obDur,3.2s) linear 1;
+  right: -60px;
+}
+@keyframes moveObstacle { from{ right:-60px; } to{ right:100%; } }
+.obstacle.disintegrate{ animation:rockVanish .24s ease forwards; }
+@keyframes rockVanish{ 0%{opacity:1;}70%{opacity:.35;}100%{opacity:0;transform:translateY(-6px);} }
+
+/* Monedas */
+.coin {
+  position:absolute; width:22px; height:22px; z-index:1;
+  background:url("img/Moneda.png") center/contain no-repeat;
+  animation: moveCoin var(--coinDur,3.2s) linear 1;
+  right: -30px;
+}
+@keyframes moveCoin { from{ right:-30px; } to{ right:100%; } }
+.coin.pop { animation: coinPop .24s ease forwards; }
+@keyframes coinPop { 0%{transform:scale(1); opacity:1;} 100%{transform:scale(1.6); opacity:0;} }
+
+/* Controles móviles */
+.controls{
+  position: fixed; left:50%; transform: translateX(-50%);
+  bottom: 10px; display:flex; gap:12px; justify-content:center; align-items:center;
+  padding:10px 12px; background: rgba(255,255,255,0.9);
+  border: 2px solid #333; border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15); z-index: 1500; backdrop-filter: blur(4px);
+  max-width: calc(100vw - 20px);
+}
+.ctrl{
+  width:min(22vw,120px); max-width:140px; height:56px; border:2px solid #333; border-radius:10px;
+  background:#fff; font-size:22px; font-weight:700; touch-action: manipulation;
+}
+@media (min-width: 1200px){ .controls{ display:none; } }
