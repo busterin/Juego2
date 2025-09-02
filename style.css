@@ -1,6 +1,7 @@
 /* ==== Base y variables ==== */
 * { box-sizing: border-box; }
-:root { --dayCycle: 60s; --scale: 1; }
+/* Tamaño único para obstáculos y monedas */
+:root { --dayCycle: 60s; --scale: 1; --entitySize: 44px; }
 
 body {
   font-family: Arial, sans-serif;
@@ -64,9 +65,9 @@ body {
 #player.hurt { animation: hurtBlink .6s ease-in-out; }
 @keyframes hurtBlink { 0%,100%{opacity:1;} 20%,40%,60%,80%{opacity:.2;} }
 
-/* Enemigos (rocas sin salto) */
+/* Obstáculos (sin salto) – mismo tamaño que moneda */
 .obstacle {
-  position:absolute; bottom:0; width:50px; height:50px; z-index:1;
+  position:absolute; bottom:0; width:var(--entitySize); height:var(--entitySize); z-index:1;
   background:url("img/Roca.png") bottom center/contain no-repeat;
   animation: moveObstacle var(--obDur,3.2s) linear 1;
   right: -60px;
@@ -75,9 +76,9 @@ body {
 .obstacle.disintegrate{ animation:rockVanish .24s ease forwards; }
 @keyframes rockVanish{ 0%{opacity:1;}70%{opacity:.35;}100%{opacity:0;transform:translateY(-6px);} }
 
-/* Monedas */
+/* Monedas – mismo tamaño que obstáculo */
 .coin {
-  position:absolute; width:22px; height:22px; z-index:1;
+  position:absolute; width:var(--entitySize); height:var(--entitySize); z-index:1;
   background:url("img/Moneda.png") center/contain no-repeat;
   animation: moveCoin var(--coinDur,3.2s) linear 1;
   right: -30px;
