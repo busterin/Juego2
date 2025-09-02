@@ -56,8 +56,9 @@ body {
 
 /* Oso (jugador) */
 #player {
-  position: absolute; bottom: 0; left: 140px; /* X fija */
-  width: 80px; height: 80px;
+  position: absolute; bottom: 0; left: 140px;
+  width: 56px;   /* antes 80px */
+  height: 56px;  /* antes 80px */
   background:url("img/Oso.png") center bottom/contain no-repeat;
   transform-origin: bottom center; z-index: 2;
   transition: bottom 120ms ease, opacity .12s linear;
