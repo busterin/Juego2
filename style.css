@@ -26,9 +26,7 @@ body {
 }
 
 /* 👇 Quita marco azul al enfocar el área */
-#gameArea:focus {
-  outline: none;
-}
+#gameArea:focus { outline: none; }
 
 /* Cielo día-noche (sutil) */
 .sky-tint {
@@ -52,11 +50,22 @@ body {
   font-weight: 700;
 }
 .hud-right { right: 6px; left: auto; }
+/* Centro superior para el cronómetro */
+.hud-center { left: 50%; transform: translateX(-50%); }
 
+/* Icono de vidas */
 .honey {
   width: 22px; height: 22px;
   background: url("img/Panal.png") center/contain no-repeat;
   filter: drop-shadow(0 1px 0 rgba(0,0,0,0.3));
+}
+
+/* Icono de puntos personalizado */
+.score-icon {
+  width: 22px;
+  height: 22px;
+  background: url("img/Puntos.png") center/contain no-repeat;
+  display: inline-block;
 }
 
 /* Oso (jugador) */
@@ -100,14 +109,6 @@ body {
 /* Variantes de monedas */
 .coin1 { background:url("img/Moneda1.png") center/contain no-repeat; }
 .coin2 { background:url("img/Moneda2.png") center/contain no-repeat; }
-
-/* Icono de puntos personalizado */
-.score-icon {
-  width: 22px;
-  height: 22px;
-  background: url("img/Puntos.png") center/contain no-repeat;
-  display: inline-block;
-}
 
 /* Overlays */
 .overlay {
